@@ -1,0 +1,356 @@
+--set ansi_padding on 
+--go
+--set ansi_nulls on 
+--go
+--set quoted_identifier on
+--go
+
+use [Paintball_Club]		
+go
+
+create table [Worker]
+(
+	[ID_Worker] [int] not null identity(1,1),
+	[First_Name] [varchar] (30) not null,		
+	[Second_Name] [varchar] (30) not null,
+	[Middle_Name] [varchar] (30) null default('-'),
+	[Key_Worker] [varchar] (10) not null,
+	[Login_Worker] [varchar] (30) not null,
+	[Password_Worker] [varchar] (30) not null
+	constraint [PK_Worker] primary key clustered
+	([ID_Worker] ASC) on [PRIMARY],
+	constraint [UQ_Key_Worker] unique ([Key_Worker]),
+	constraint [UQ_Login_Worker] unique ([Login_Worker]),	
+)
+go
+
+create table [Position]
+(
+	[ID_Position] [int] not null identity(1,1),
+	[Name_Position] [varchar] (50) not null,
+	[Position_Price] [decimal] (38,2) null default(0.0),
+	constraint [PK_Position] primary key clustered
+	([ID_Position] ASC) on [PRIMARY],
+	constraint [UQ_Name_Position] unique ([Name_Position]),
+	constraint [CH_Position_Price] check ([Position_Price] >= 0.0)
+)
+go
+
+
+
+create table [Connection]
+(
+	[ID_Connection] [int] not null identity(1,1),
+	[Worker_ID] [int] not null,
+	[Position_ID] [int] not null,
+	constraint [PK_Connection] primary key clustered
+	([ID_Connection] ASC) on [PRIMARY],
+	constraint [FK_Worker_Connection] foreign key ([Worker_ID])
+	references [Worker] ([ID_Worker]),
+	constraint [FK_Position_Connection] foreign key ([Position_ID])
+	references [Position] ([ID_Position]),
+)
+go
+
+create table [Worker_Change]
+(
+	[ID_Worker_Change] [int] not null identity(1,1),
+	[Worker_Change_Number] [varchar] (11) not null,
+	[Connection_ID] [int] not null,
+	constraint [PK_Worker_Change] primary key clustered
+	([ID_Worker_Change] ASC) on [PRIMARY],
+	constraint [UQ_Worker_Change_Number] unique ([Worker_Change_Number]),
+	constraint [FK_Connection_Worker_Change] foreign key ([Connection_ID])
+	references [Connection] ([ID_Connection]),
+)
+go
+
+
+create table [Payment_Type]
+(
+	[ID_Payment_Type] [int] not null identity(1,1),
+	[Name_Payment_Type] [varchar] (30) not null,
+	constraint [PK_Payment_Type] primary key clustered
+	([ID_Payment_Type] ASC) on [PRIMARY]
+)
+go
+
+
+create table [Client]
+(
+	[ID_Client] [int] not null identity(1,1),
+	[First_Name_Client] [varchar] (30) not null,
+	[Second_Name_Client] [varchar] (30) not null,
+	[Middle_Name_Client] [varchar] (30) null default('-'),
+	[Login_Client] [varchar] (32) not null,
+	[Password_Client] [varchar] (32) not null,
+	constraint [PK_Client] primary key clustered
+	([ID_Client] ASC) on [PRIMARY],
+	constraint [UQ_Login_Client] unique ([Login_Client])
+)
+go
+
+
+create table [Client_Card]
+(
+	[ID_Client_Card] [int] not null identity(1,1),
+	[Client_ID] [int] not null,
+	[Validity] [varchar] (5) not null,
+	[Card_Holder] [varchar] (100) not null,
+	constraint [PK_Client_Card] primary key clustered
+	([ID_Client_Card] ASC) on [PRIMARY],
+	constraint [FK_Client_Client_Card] foreign key ([Client_ID])
+	references [Client] ([ID_Client]),
+)
+go
+
+
+create table [Sale_Check]
+(
+	[ID_Sale_Check] [int] not null identity(1,1),
+	[Sale_Check_Number] [varchar] (13) not null,
+	[Payment_Type_ID] [int] not null,
+	[Worker_Change_ID] [int] not null,
+	[Client_Card_ID] [int] not null,
+	[Date_Create_Check] [date] not null,
+	[Time_Create_Check] [time] not null,
+	[Deposited_Amount] [decimal] (38,2) not null,
+	[Whith_VAT] [decimal] (38,2) not null,
+	[Whithout_VAT] [decimal] (38,2) not null,
+	constraint [PK_Sale_Check] primary key clustered
+	([ID_Sale_Check] ASC) on [PRIMARY],
+	constraint [UQ_Sale_Check_Number] unique ([Sale_Check_Number]),
+	constraint [FK_Payment_Type_Sale_Check] foreign key ([Payment_Type_ID])
+	references [Payment_Type] ([ID_Payment_Type]),
+	constraint [FK_Worker_Change_Sale_Check] foreign key ([Worker_Change_ID])
+	references [Worker_Change] ([ID_Worker_Change]),
+	constraint [FK_Client_Card_Sale_Check] foreign key ([Client_Card_ID])
+	references [Client_Card] ([ID_Client_Card]),
+)
+go
+
+
+create table [Cancellation]
+(
+	[ID_Cancellation] [int] not null identity(1,1),
+	[Cancellation_Number] [varchar] (16) not null,
+	[Date_Create_Cncll] [date] not null,
+	constraint [PK_Cancellation] primary key clustered
+	([ID_Cancellation] ASC) on [PRIMARY],
+	constraint [UQ_Cancellation_Number] unique ([Cancellation_Number])
+)
+go
+
+
+
+create table [Type_Service]
+(
+	[ID_Type_Service] [int] not null identity(1,1),
+	[Type_Service_Name] [varchar] (30) not null,
+	[Date_Time_Event] [datetime] not null,	
+	constraint [PK_Type_Service] primary key clustered
+	([ID_Type_Service] ASC) on [PRIMARY],
+)
+go
+
+
+create table [Country]
+(
+	[ID_Country] [int] not null identity(1,1),
+	[Country_Name] [varchar] (30) not null,
+	constraint [PK_Country] primary key clustered
+	([ID_Country] ASC) on [PRIMARY],
+)
+go
+
+
+create table [Maker]
+(
+	[ID_Maker] [int] not null identity(1,1),
+	[Maker_Name] [varchar] (30) not null,
+	[Country_ID] [int] not null,
+	constraint [PK_Maker] primary key clustered
+	([ID_Maker] ASC) on [PRIMARY],
+	constraint [FK_Country_Maker] foreign key ([Country_ID])
+	references [Country] ([ID_Country])
+)
+go
+
+
+create table [Market_Place]
+(
+	[ID_Market_Place] [int] not null identity(1,1),
+	[Market_Address] [varchar] (max) not null,
+	[Country_ID] [int] not null,
+	constraint [PK_Market_Place] primary key clustered
+	([ID_Market_Place] ASC) on [PRIMARY],
+)
+go
+
+
+create table [Warehouse]
+(
+	[ID_Warehouse] [int] not null identity(1,1),
+	[Warehouse_Address] [varchar] (max) not null,
+	[Market_Place_ID] [int] not null,
+	constraint [PK_Warehouse] primary key clustered
+	([ID_Warehouse] ASC) on [PRIMARY],
+	constraint [FK_Market_Place_Warehouse] foreign key ([Market_Place_ID])
+	references [Market_Place] ([ID_Market_Place])
+)
+go
+
+
+create table [Delivery]
+(
+	[ID_Delivery] [int] not null identity(1,1),
+	[Integrity] [varchar] (30) not null,
+	[Maker_ID] [int] not null,
+	[Warehouse_ID] [int] not null,
+	[Delivery_Number] [varchar] (15) not null,
+	[Date_Create_Delivery] [date] not null,
+	[Time_Create_Delivery] [time] not null,
+	constraint [PK_Delivery] primary key clustered
+	([ID_Delivery] ASC) on [PRIMARY],
+	constraint [UQ_Delivery_Number] unique ([Delivery_Number]),
+	constraint [FK_Maker_Delivery] foreign key ([Maker_ID])
+	references [Maker] ([ID_Maker]),
+	constraint [FK_Warehouse_Delivery] foreign key ([Warehouse_ID])
+	references [Warehouse] ([ID_Warehouse])
+)
+go
+
+
+create table [Inventory]
+(
+	[ID_Inventory] [int] not null identity(1,1),
+	[Inventory_Name] [varchar] (max) not null,
+	[Delivery_ID] [int] not null,
+	[Condition] [varchar] (30) not null,
+	constraint [PK_Inventory] primary key clustered
+	([ID_Inventory] ASC) on [PRIMARY],
+	constraint [FK_Delivery_Inventory] foreign key ([Delivery_ID])
+	references [Delivery] ([ID_Delivery])
+)
+go
+
+
+create table [Service]
+(
+	[ID_Service] [int] not null identity(1,1),
+	[Price_Service] [varchar] (max) not null,
+	[Inventory_ID] [int] not null,
+	[Type_Service_ID] [int] not null,
+	[Service_Name] [varchar] (50) not null,
+	[Compound] [varchar] (max) null,
+	[Vendor_Code] [varchar] (13) not null,
+	constraint [PK_Service] primary key clustered
+	([ID_Service] ASC) on [PRIMARY],
+	constraint [FK_Inventory_Service] foreign key ([Inventory_ID])
+	references [Inventory] ([ID_Inventory]),
+	constraint [FK_Type_Service_Service] foreign key ([Type_Service_ID])
+	references [Type_Service] ([ID_Type_Service])
+)
+go
+
+
+create table [Cancellation_View]
+(
+	[ID_Cancellation_View] [int] not null identity(1,1),
+	[Cancellation_ID] [int] not null,
+	[Service_ID] [int] not null,
+	constraint [PK_Cancellation_View] primary key clustered
+	([ID_Cancellation_View] ASC) on [PRIMARY],
+	constraint [FK_Cancellation_Cancellation_View] foreign key ([Cancellation_ID])
+	references [Cancellation] ([ID_Cancellation]),
+	constraint [FK_Service_Cancellation_View] foreign key ([Service_ID])
+	references [Service] ([ID_Service])
+)
+go
+
+
+
+create table [Sale_Check_View]
+(
+	[ID_Sale_Check_View] [int] not null identity(1,1),
+	[Sale_Check_View_Amount] [int] not null,
+	[Sale_Check_ID] [int] not null,
+	[Service_ID] [int] not null,
+	constraint [PK_Sale_Check_View] primary key clustered
+	([ID_Sale_Check_View] ASC) on [PRIMARY],
+	constraint [FK_Sale_Check_Sale_Check_View] foreign key ([Sale_Check_ID])
+	references [Sale_Check] ([ID_Sale_Check]),
+	constraint [FK_Service_Sale_Check_View] foreign key ([Service_ID])
+	references [Service] ([ID_Service])
+)
+go	
+
+
+create table [Contractor]
+(
+	[ID_Contractor] [int] not null identity(1,1),
+	[Full_Name_Contractor] [varchar] (max) not null,
+	[Short_Name_Contractor] [varchar] (50) not null,
+	[Legal_Address_Contractor] [varchar] (max) not null,
+	[Physical_Address_Contractor] [varchar] (max) not null,
+	[Contractor_E_Mail] [varchar] (max) null default ('-'),
+	[Contractor_Phone_Number] [varchar] (17) not null,
+	[BIC] [varchar] (8) not null,
+	[ARCoEaO] [varchar] (10) not null,
+	[ITN] [varchar] (12) not null,
+	constraint [PK_Contractor] primary key clustered
+	([ID_Contractor] ASC) on [PRIMARY],
+	constraint [CH_Contractor_E_Mail] check ([Contractor_E_Mail]
+	like '%@%.%'),
+)
+go	
+
+
+create table [Representative]
+(
+	[ID_Representative] [int] not null identity(1,1),
+	[First_Name_Representative] [varchar] (30) not null,
+	[Second_Name_Representative] [varchar] (30) not null,
+	[Middle_Name_Representative] [varchar] (30) not null default ('-'),
+	[Contractor_ID] [int] not null,
+	constraint [PK_Representative] primary key clustered
+	([ID_Representative] ASC) on [PRIMARY],
+	constraint [FK_Contractor_Representative] foreign key ([Contractor_ID])
+	references [Contractor] ([ID_Contractor])
+)
+go
+
+
+create table [Treaty]
+(
+	[ID_Treaty] [int] not null identity(1,1),
+	[Treaty_Number] [varchar] (15) not null,
+	[Urgent] [varchar] (20) not null,
+	[Term] [varchar] (15) not null,
+	[Date_Create_Term] [date] not null,
+	[Representative_ID] [int] not null,
+	constraint [PK_Treaty] primary key clustered
+	([ID_Treaty] ASC) on [PRIMARY],
+	constraint [FK_Representative_Treaty] foreign key ([Representative_ID])
+	references [Representative] ([ID_Representative])
+)
+go
+
+
+create table [Service_View]
+(
+	[ID_Service_View] [int] not null identity(1,1),
+	[Service_Amount] [int] not null,
+	[Treaty_ID] [int] not null,
+	[Service_ID] [int] not null,
+	constraint [PK_Service_View] primary key clustered
+	([ID_Service_View] ASC) on [PRIMARY],
+	constraint [FK_Treaty_Service_View] foreign key ([Treaty_ID])
+	references [Treaty] ([ID_Treaty]),
+	constraint [FK_Service_Service_View] foreign key ([Service_ID])
+	references [Service] ([ID_Service])
+)
+go
+
+alter table [Service] alter column [Price_Service] [decimal] (38,2) not null
+go

@@ -1,0 +1,464 @@
+--set ansi_padding on 
+--go
+--set ansi_nulls on 
+--go
+--set quoted_identifier on
+--go
+
+use [Paintball_Club]		
+go
+
+
+insert into [Type_Service] ([Type_Service_Name], [Date_Time_Event])
+values ('На открытой местности','1998-05-02 01:23:56.123'),
+('На закрытой местности','1998-05-02 01:23:56.123')
+go
+
+select [Type_Service_Name] as "Название типа услуги", [Date_Time_Event] as "Время проведения" from [Type_Service]
+order by [Type_Service_Name] ASC
+go
+
+
+insert into [Country]
+values ('Швейцария'),
+('Россия')
+go
+
+select [Country_Name] as "Название страны" from [Country]
+order by [Country_Name] ASC
+go
+
+
+insert into [Market_Place] ([Market_Address])
+values ('ул. Чертановская, д.6, стр. 2'),
+('ул. Волжская, д.10, к.1'),
+('ул. Айтихабово, д.0, к.0')
+go
+
+select [Market_Address] as "Адрес магазнина" from [Market_Place]
+order by [Market_Address] ASC
+go
+
+
+insert into [Payment_Type] ([Name_Payment_Type])
+values ('Наличный'),
+('Без наличный')
+go
+
+select [Name_Payment_Type] as "Тип оплаты" from [Payment_Type] 
+order by [Name_Payment_Type] ASC
+go
+
+
+insert into [Position] ([Name_Position])
+values ('Инструктор'),
+('Кассир')
+go
+
+select [Name_Position] as "Название должности" from [Position]
+order by [Name_Position] ASC
+go
+
+insert into [Worker] ([First_Name], [Second_Name], [Middle_Name], [Key_Worker], [Login_Worker], [Password_Worker])
+values ('Павлов','Павел','Павлович','Rergewrg','PPP','Pass')
+go
+insert into [Worker] ([First_Name], [Second_Name], [Middle_Name], [Key_Worker],[Login_Worker], [Password_Worker])
+values ('Дмитриев','Дмитрий','Дмитриевич','Rgegregr','DDD','Pass')
+go
+insert into [Worker] ([First_Name], [Second_Name], [Middle_Name], [Key_Worker], [Login_Worker], [Password_Worker])
+values ('Олегов','Олег','Олегович','Rgrgerg','OOO','Pass')
+go
+
+select [First_Name]+' '+[Second_Name]+' '+[Middle_Name] as "ФИО Сотрудника", [Key_Worker] as "Ключ отмены", [Login_Worker] as "Логин сотрудника", 
+[Password_Worker] as "Пароль сотрудника" from [Worker]
+order by [First_Name] ASC
+go
+
+
+
+alter table [Client] add constraint [CH_Login_Client]
+check (len([Login_Client])>=8)
+
+insert into [Client] ([First_Name_Client], [Second_Name_Client], [Middle_Name_Client], [Login_Client], [Password_Client])
+values ('Иванов','Иван','Иванович','IvanovII','Pass'),
+('Петров','Пётр','Петрович','PetrovPP','Pass'),
+('Андреев','Андрей','Андреевич','AndreevAA','Pass')
+go
+
+select [First_Name_Client]+' '+[Second_Name_Client]+' '+[Middle_Name_Client] as "ФИО Клиента", [Login_Client] as "Логин покупателя", [Password_Client] as "Пароль покупателя" from [dbo].[Client]
+order by [Login_Client] ASC
+go
+
+
+alter table [Product_List] alter column [Date_Time_Create_PL] [datetime] null
+go
+alter table [Product_List] add constraint [DT_Date_Time_Create_PL] default(getdate()) for [Date_Time_Create_PL]
+go
+alter table [Product_List] add constraint [UQ_Product_List_Number] unique ([Product_List_Number])
+go
+
+insert into [Product_List] ([Product_List_Number])
+values ('0000000001-21'),
+('0000000002-21'),
+('0000000003-21')
+go
+
+select [Product_List_Number] as "Номер товарной сметы", [Date_Time_Create_PL] as "Дата и время создания" from [Product_List]
+order by [Date_Time_Create_PL] DESC
+go
+
+
+alter table [Cancellation] alter column [Date_Create_Cncll] [date] null
+go
+alter table [Cancellation] add constraint [DT_Date_Create_Cncll] default(getdate()) for [Date_Create_Cncll]
+go
+
+insert into [Cancellation] ([Cancellation_Number])
+values ('0000000001-21-ОП'),
+('0000000004-21-ОП'),
+('0000000002-21-ОП'),
+('0000000003-21-ОП')
+go
+
+select [Cancellation_Number] as "Номер отмены приёма", [Date_Create_Cncll] as "Дата формирования" from [Cancellation]
+order by [Date_Create_Cncll] DESC
+go
+
+
+alter table [Maker] add constraint [UQ_Name_Maker] unique ([Maker_Name])
+go	
+
+insert into [Maker] ([Maker_Name], [Country_ID])
+values ('Nestle',1),
+('1-ый овощь на р-не',2),
+('Мясницкий ряд',2),
+('Вимм-Биль-Дан',2)
+go
+
+UPDATE [Maker] SET [Maker_Name]='Arsenal' WHERE [ID_Maker]=1
+UPDATE [Maker] SET [Maker_Name]='Strike Active' WHERE [ID_Maker]=2
+UPDATE [Maker] SET [Maker_Name]='АНКО' WHERE [ID_Maker]=3
+UPDATE [Maker] SET [Maker_Name]='Airsoftstore' WHERE [ID_Maker]=4
+
+select [Maker_Name] as "Название производителя", [Country_Name] as "Страна поизводителя" from [Maker]
+inner join [Country] on [Country_ID] = [ID_Country]
+order by [Country_Name] ASC, [Maker_Name] DESC
+go
+
+
+insert into [Warehouse] ([Warehouse_Address], [Market_Place_ID])
+values ('ул. Чертановская, д.6, стр. 3', 3),
+('ул. Чертановская, д.6, стр. 1', 3),
+('ул. Волжская, д.10, к.2', 2)
+go
+
+select [Warehouse_Address] as "Адрес склада", [Market_Address] as "Адрес маказина" from [Warehouse]
+inner join [dbo].[Market_Place] on [ID_Market_Place] = [Market_Place_ID]
+order by [Warehouse_Address], [Market_Address] ASC
+go
+
+--UPDATE [Market_Place] SET [Market_Address]='ул. Чертановская, д.6, стр. 1' WHERE [ID_Market_Place]=1
+--INSERT INTO [Market_Place] PARTITION (p1) VALUES(1, 2, 3);
+--update [Market_Place] set [ID_Market_Place]=[ID_Market_Place]-1
+--Truncate table [Market_Place]
+--select * from [Market_Place] where [ID_Market_Place] = 1
+
+
+insert into [Contractor] ( [Full_Name_Contractor], [Short_Name_Contractor], 
+[Legal_Address_Contractor], [Physical_Address_Contractor], [Contractor_E_Mail], [Contractor_Phone_Number],
+[BIC], [ITN], [ARCoEaO])
+values ( '"Первый поставщик"', '"П Пост"', 'г. Москва, 155367, ул. Волоколамская, д.6, стр. 5', 
+'г. Москва, 155367, ул. Волоколамская, д.6, стр. 5', '1Positionavschik@gmail.com', '+7(495)422-63-64', 
+'35674316', '396652867052', '4824096316'),
+( '"Куда скажете туда и поедем"', '"КСТиП"', 'г. Москва, 156733, ул. Бибирево, д.17, к.6,', 
+'г. Москва, 173274, ул. Алтуфьево, д.47, стр.17', 'kuda_tuda@gmail.com', '+7(499)526-88-18', 
+'29665123', '583349957123', '4995123385'),
+( '"Быстро и надёжно"', '"БиН"', 'г. Санкт-Петербург, 4226432, ул. Новаторов, д.64, к.4',
+'г. Москва, 198887, ул. Киевская, д.10, стр. 10', 'bin@gmail.com', '+7(999)542-77-87',
+'83128904', '679333078641', '6722450097')
+go
+
+select 'полное название: '+[Full_Name_Contractor]+', сокращённое название: '+[Short_Name_Contractor] as "Данные о постащике",
+'Юридический адрес: '+[Legal_Address_Contractor]+', фактическтй адрес: '+[Physical_Address_Contractor]+'. Адрес электронной почты: '+[Contractor_E_Mail]+', контактный телефон: '+[Contractor_Phone_Number] as "Контактная информация",
+'БИК: '+[BIC]+', ИНН: '+[ITN]+', ОКПО: '+[ARCoEaO] as "Реквизиты фирмы поставщика" from [Contractor]
+order by [Full_Name_Contractor] ASC
+go
+
+
+insert into [Representative] ([Contractor_ID], [First_Name_Representative], [Second_Name_Representative], [Middle_Name_Representative])
+values (1,'Романов','Роман','Романович'),
+(2,'Кириллов','Кирилл','Кириллович'),
+(3,'Владимиров','Владимир','Владимирович')
+go
+
+select 'Полное название: '+[Full_Name_Contractor] as "Представляемая фирма", 
+[First_Name_Representative]+' '+[Second_Name_Representative]+' '+[Middle_Name_Representative] as "ФИО представителя" 
+from [Representative]
+inner join [dbo].[Contractor] on [Contractor_ID] = [ID_Contractor]
+order by [First_Name_Representative] ASC
+go
+
+
+alter table [Treaty] alter column [Date_Create_Term] [date] null
+go
+alter table [Treaty] add constraint [DT_Date_Create_Term] default(getdate()) for [Date_Create_Term]
+go
+
+insert into [Treaty] ([Treaty_Number], [Urgent], [Term], [Representative_ID])
+values ('0000000001-21-Д','Да','05 лет',1),
+('0000000002-21-Д','Да','05 лет',2),
+('0000000003-21-Д','Да','02 лет',3)
+go
+
+select [Treaty_Number] as "Номер договора",  'Срочный: '+[Urgent]+'. Срок действия: '+[Term]+'. Дата создания договора: '
++CONVERT([varchar](10), [Date_Create_Term]) as "Детали договора",'Полное название: '+[Full_Name_Contractor]+
+'. ФИО представителя:'+[First_Name_Representative]+' '+[Second_Name_Representative]+' '+[Middle_Name_Representative] 
+as "Данные организации поставщика" 
+from [Treaty]
+inner join [Representative] on [Representative_ID] = [ID_Representative]
+inner join [Contractor] on [Contractor_ID] = [ID_Contractor]
+order by [Date_Create_Term] DESC
+go
+
+
+alter table [Client_Card] add [Card_Number] [varchar] (19) not null, constraint [UQ_Card_Number] unique ([Card_Number]),
+constraint [CH_Card_Number] check ([Card_Number] like '[0-9][0-9][0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9][0-9][0-9] [0-9][0-9][0-9][0-9]')
+go
+
+insert into [Client_Card] ([Card_Number], [Card_Holder], [Validity], [Client_ID])
+values ('2245 5367 7642 7640','IVANOV IVAN','02/24',1),
+('5542 5674 9974 8974','PETROV PETR','10/25',2),
+('8444 8854 1178 9942','ANDREEV ANDREY','12/24',3)
+go
+
+
+insert into [Client_Card] ([Card_Number], [Card_Holder], [Validity], [Client_ID])
+values ('2245 5367 7642 7640','IVANOV IVAN','02/24',1),
+('5542 5674 9974 8974','PETROV PETR','10/25',2),
+('8444 8854 1178 9942','ANDREEV ANDREY','12/24',3)
+go
+
+select [First_Name_Client]+' '+[Second_Name_Client]+' '+[Middle_Name_Client] as "Данные покупателя", 'Номер карты: '+[Card_Number]+'. Держатель: '+[Card_Holder]+', действительна до: '+[Validity] as "Данные карты" from [Client]
+inner join [Client_Card] on [ID_Client] = [Client_ID]
+order by [First_Name_Client] ASC
+go
+
+
+insert into [Connection] ([Position_ID], [Worker_ID])
+values (1,1),
+(2,2),
+(1,4)
+go
+
+select [First_Name]+' '+[Second_Name]+' '+[Middle_Name] as "ФИО Сотрудника", [Key_Worker] as "Ключ отмены", [Name_Position] as "Должность" from [Connection]
+inner join [Worker] on [ID_Worker] = [Worker_ID]
+inner join [Position] on [ID_Position] = [Position_ID]
+order by [Name_Position] ASC, [First_Name] DESC
+go
+
+
+alter table [Worker_Change] add [Date_Time_Create_Emp_Chg] [datetime] null default(getdate())
+
+insert into [Worker_Change] ([Worker_Change_Number],[Connection_ID],[Cash_Machine_ID])
+values ('00000000001', 4, 1),
+('00000000002', 5, 2),
+('00000000004', 6, 3),
+('00000000005', 5, 2),
+('00000000003', 4, 1)
+go
+
+select 'ФИО: '+[First_Name]+' '+[Second_Name]+' '+[Middle_Name]+', должность: '+[Name_Position] 
+as "Данные сотрудника", '№ смены: '+[Worker_Change_Number]+', дата открытия: '+convert([varchar] (25), 
+[Date_Time_Create_Worker_Change]) as "Данные смены" from [Worker_Change] 
+inner join [Connection] on [Connection_ID] = [ID_Connection]
+inner join [Worker] on [ID_Worker] = [Worker_ID]
+inner join [Position] on [ID_Position] = [Position_ID]
+order by [Worker_Change_Number] DESC
+go
+
+
+insert into [Worker_Change] ([Worker_Change_Number],[Connection_ID],[Cash_Machine_ID])
+values ('00000000001', 4, 1),
+('00000000002', 5, 2),
+('00000000004', 6, 3),
+('00000000005', 5, 2),
+('00000000003', 4, 1)
+go
+
+select 'ФИО: '+[First_Name]+' '+[Second_Name]+' '+[Middle_Name]+', должность: '+[Name_Position] 
+as "Данные сотрудника", '№ смены: '+[Worker_Change_Number]+', дата открытия: '+convert([varchar] (25), 
+[Date_Time_Create_Emp_Chg]) as "Данные смены" from [Worker_Change] 
+inner join [Connection] on [Connection_ID] = [ID_Connection]
+inner join [Worker] on [ID_Worker] = [Worker_ID]
+inner join [Position] on [ID_Position] = [Position_ID]
+order by [Worker_Change_Number] DESC
+go
+
+
+alter table [Delivery] alter column [Date_Create_Delivery] [date] null
+go
+alter table [Delivery] add constraint [DT_Date_Create_Delivery] default(getdate()) for [Date_Create_Delivery]
+go
+
+insert into [Delivery] ([Integrity], [Delivery_Number], [Maker_ID], [Warehouse_ID])
+values ('Нормально','0000000001-21-П',1,3),
+('Нормально','0000000004-21-П',2,4),
+('Нормально','0000000002-21-П',1,5),
+('Нормально','0000000003-21-П',3,4)
+go
+
+select [Integrity], [Delivery_Number] from [Delivery]
+order by [Delivery_Number] ASC
+go
+
+
+alter table [Sale_Check] alter column [Date_Create_Check] [date] null
+go
+alter table [Sale_Check] add constraint [DT_Date_Create_Check] default(getdate()) for [Date_Create_Check]
+go
+alter table [Sale_Check] alter column [Time_Create_Check] [time] null
+go
+alter table [Sale_Check] add constraint [DT_Time_Create_Check] default(getdate()) for [Time_Create_Check]
+go
+
+insert into [Sale_Check] ([Sale_Check_Number], [Deposited_Amount], [Whith_VAT], 
+[Whithout_VAT], [Payment_Type_ID], [Worker_Change_ID], [Client_Card_ID])
+values ('0000000001-ФК', 900, 804.00, 670.00, 1, 2, 1),
+('0000000002-ФК', 900, 900.00, 750.00, 2, 3, 2),
+('0000000004-ФК', 600, 600.00, 500.00, 1, 5, 3),
+('0000000003-ФК', 144, 144.00, 120.00, 1, 4, 2)
+go
+
+select 'Номер чека -- '+[Sale_Check_Number]+'. Дата и время открытия: '+convert([varchar](10), [Date_Create_Check])+' '+CONVERT([varchar] (10),[Time_Create_Check]) as "Данные чека", 
+'Внесённая сумма: '+CONVERT([varchar] (10),[Deposited_Amount])+' руб. С НДС: '+CONVERT([varchar] (10),[Whith_VAT])+' руб. Без НДС:'+CONVERT([varchar] (10),[Whithout_VAT])+' руб.' as "Оплата", 
+'ФИО острудника: '+[First_Name]+' '+[Second_Name]+' '+[Middle_Name]+'. Должность: '+[Name_Position] as "Данные сотрудника",
+[Name_Payment_Type] as "Тип оплаты" from [Sale_Check]
+inner join [Client_Card] on [Client_Card_ID] = [ID_Client_Card]
+inner join [Worker_Change] on [ID_Worker_Change] = [Worker_Change_ID] 
+inner join [Connection] on [ID_Connection] = [Connection_ID]
+inner join [Cash_Machine] on [ID_Cash_Machine] = [Cash_Machine_ID]
+inner join [Worker] on [ID_Worker] = [Worker_ID]
+inner join [Position] on [ID_Position] = [Position_ID]
+inner join [Payment_Type] on [ID_Payment_Type] = [Payment_Type_ID]
+order by [Sale_Check_Number] desc, [Date_Create_Check] DESC, [Time_Create_Check] ASC
+go
+
+insert into [Inventory] ([Inventory_Name], [Delivery_ID], [Condition]) 
+values('винтовка', 2, 'хорошее'),
+('пистолет', 3, 'хорошее'),
+('перчатки', 4, 'хорошее')
+go
+
+select [Inventory_Name], [Condition] from [Inventory]
+order by [Inventory_Name] ASC
+
+
+insert into [Sale_Check_View] ([Sale_Check_View_Amount], [Sale_Check_ID], [Service_ID])
+values (1, 1, 1),
+(5, 2, 2),
+(2, 3, 3),
+(1, 4, 4),
+(3, 1, 5)
+go
+
+
+insert into [Service] ([Price_Service], [Service_Name], [Compound], 
+[Vendor_Code], [Type_Service_ID], [Inventory_ID])
+values (2000,'Перестрелка','Перестрелка между 2 командами','F753273-76336',2,1),
+(3000,'Захват флага','Захватить флаг и отнести его на свою базу','R452677-43467',3,2),
+(4000,'Гонка вооружения','Опередить соперника','Y762004-22787',2,3),
+(2000,'Перестрелка','Перестрелка между 2 командами','U632206-25453',3,1),
+(4000,'Гонка вооружения','Опередить соперника','L653573-54373',2,2)
+go
+
+select 'Производитель инвентаря: '+[Maker_Name]+', страна: '+[Country_Name] as "Данные производителя", [Vendor_Code] 
+as "Артикул",'Название услуги: '+[Service_Name]+', цена за шт.: '+CONVERT([varchar] (100), 
+[Price_Service])+' руб., вид услуги: '+[Type_Service_Name]+', описание - "'+[Compound] as "Данные услуги" from [Service]
+inner join [Type_Service] on [Type_Service_ID] = [ID_Type_Service]
+inner join [Inventory] on [ID_Inventory] = [Inventory_ID]
+inner join [Delivery] on [ID_Delivery] = [Delivery_ID]
+inner join [Maker] on [ID_Maker] = [Maker_ID]
+inner join [Country] on [ID_Country] = [Country_ID]
+order by [Price_Service] ASC
+go
+
+
+insert into [Product_List_View] ([Product_List_ID], [Service_ID])
+values (1,10),
+(2,6),
+(1,7),
+(1,8),
+(3,9)
+go
+
+select 'Название: '+[Service_Name]+', артикурл: '+[Vendor_Code]+', вид услуги: '+[Type_Service_Name] as "Данные товара", 
+'Номер сметы: '+[Product_List_Number]+'. Дата создания - '+convert([varchar] (10),[Date_Time_Create_PL]) as "Данные товарной сметы" from [Product_List_View]
+inner join [Service] on [ID_Service] = [Service_ID]
+inner join [Type_Service] on [Type_Service_ID] = [ID_Type_Service]
+inner join [Product_List] on [ID_Product_List] = [Product_List_ID]
+order by [Date_Time_Create_PL] DESC, [Vendor_Code] ASC
+go
+
+update [Product_List_View] set [Service_ID]=8 where [ID_Product_List_View] = 4
+
+
+insert into [Cancellation_View] ([Cancellation_ID], [Service_ID])
+values (1,6),
+(4,7),
+(2,8),
+(1,9),
+(3,10)
+go
+
+select 'Артикул: '+[Vendor_Code]+'. Название - '+[Service_Name]+'. Стоимость: '+convert([varchar] (100), [Price_Service])+
+' руб.' as "Данные о товаре", 'Производитель: '+[Maker_Name]+'. Страна: '+[Country_Name] 
+as "Данные производителя", [Type_Service_Name] as "Тип товара", 'Номер отмены: '+[Cancellation_Number]+'. Дата формирования: '
++convert([varchar] (10), [Date_Create_Cncll]) as "Информация об отмене" from [Cancellation_View]
+inner join [Service] on [Service_ID] = [ID_Service]
+inner join [Type_Service] on [ID_Type_Service] = [Type_Service_ID]
+inner join [Inventory] on [ID_Inventory] = [Inventory_ID]
+inner join [Delivery] on [ID_Delivery] = [Delivery_ID]
+inner join [Maker] on [ID_Maker] = [Maker_ID]
+inner join [Country] on [ID_Country] = [Country_ID]
+inner join [Cancellation] on [Cancellation_ID] = [ID_Cancellation]
+order by [Date_Create_Cncll] DESC, [Vendor_Code] ASC
+go
+
+
+insert into [Service_View] ([Service_Amount], [Treaty_ID], [Service_ID])
+values (1000, 2, 6),
+(1200, 5, 7),
+(900, 3, 8),
+(2100, 2, 9),
+(1750, 4, 10)
+go
+
+select [Service_Amount] from [Service_View]
+order by [Service_Amount] ASC
+go
+
+
+delete from [Service]
+ where
+ [ID_Service] <= 5
+ go
+
+ delete from [dbo].[Position]
+ where
+ [ID_Position] = 1
+ go
+
+ delete from [dbo].[Representative]
+ where 
+ [ID_Representative] = 1
+ go
+
+ delete from [dbo].[Client_Card]
+ where
+ [ID_Client_Card] = 1
+ go
+
+ delete from [dbo].[Sale_Check_View]
+ where
+ [ID_Sale_Check_View] = 4
+ go
